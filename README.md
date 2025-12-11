@@ -5,7 +5,7 @@ Joint control
 
 Robot's joints control by C# app and ABB EGM option.
 
-C# WPF project with MVVM. 
+C# WPF project with MVVM. Robot system: RW6.16. Backup and program modul provided.
 - Youtube: 
 - Rutube: 
 
