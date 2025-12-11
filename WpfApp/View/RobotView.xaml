@@ -1,0 +1,243 @@
+<Window x:Class="WpfApp.RobotView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:WpfApp.ViewModels"
+        mc:Ignorable="d"
+        Title="3D Robot View" Height="487" Width="802"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:RobotViewModel />
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Панель управления осями -->
+        <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0" Background="#F5F5F5">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="8">
+                    <ItemsControl ItemsSource="{Binding Robot.Axes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="LightGray" BorderThickness="1" 
+                                        Margin="0,0,0,8" Padding="6" 
+                                        Background="White" CornerRadius="3">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" 
+                                                   FontWeight="Bold" 
+                                                   FontSize="11"
+                                                   Margin="0,0,0,3"/>
+                                        <TextBlock FontSize="10">
+                                            <Run Text="{Binding Angle, StringFormat=F1}"/>
+                                            <Run Text="°"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Separator Margin="0,15,0,10"/>
+
+                    <TextBlock Text="Camera Control" 
+                               FontSize="12" FontWeight="Bold" 
+                               Margin="0,0,0,5"/>
+                    <TextBlock Text="Mouse: Pan (LMB drag), Rotate (RMB drag), Zoom (Wheel)" 
+                               FontSize="9" 
+                               Foreground="Gray"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,3"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- 3D Viewport -->
+        <Border Grid.Column="1" Background="Black" 
+                MouseLeftButtonDown="Viewport_MouseLeftButtonDown" 
+                MouseLeftButtonUp="Viewport_MouseLeftButtonUp" 
+                MouseRightButtonDown="Viewport_MouseRightButtonDown"
+                MouseRightButtonUp="Viewport_MouseRightButtonUp"
+                MouseMove="Viewport_MouseMove"
+                MouseWheel="Viewport_MouseWheel">
+            <Viewport3D x:Name="Viewport3D">
+                <Viewport3D.Camera>
+                    <PerspectiveCamera x:Name="Camera"
+                                       FieldOfView="60"/>
+                </Viewport3D.Camera>
+
+                <!-- Освещение -->
+                <ModelVisual3D>
+                    <ModelVisual3D.Content>
+                        <AmbientLight Color="White" />
+                    </ModelVisual3D.Content>
+                </ModelVisual3D>
+                <ModelVisual3D>
+                    <ModelVisual3D.Content>
+                        <DirectionalLight Color="White" Direction="1,-1,-1" />
+                    </ModelVisual3D.Content>
+                </ModelVisual3D>
+
+                <!-- Модель робота -->
+                <ModelVisual3D x:Name="RobotModel">
+                    <ModelVisual3D.Content>
+                        <Model3DGroup>
+                            <!-- Смещение всей модели вниз, чтобы основание было внизу -->
+                            <Model3DGroup.Transform>
+                                <TranslateTransform3D OffsetY="0" OffsetX="0" OffsetZ="-1.8"/>
+                            </Model3DGroup.Transform>
+                            <!-- Ось 1 - База (вращение вокруг Z) -->
+                            <Model3DGroup x:Name="Axis1Group">
+                                <!-- База робота -->
+                                <GeometryModel3D>
+                                    <GeometryModel3D.Geometry>
+                                        <MeshGeometry3D 
+                                            Positions="-0.3,-0.3,0 0.3,-0.3,0 0.3,0.3,0 -0.3,0.3,0 -0.3,-0.3,0.2 0.3,-0.3,0.2 0.3,0.3,0.2 -0.3,0.3,0.2"
+                                            TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                    </GeometryModel3D.Geometry>
+                                    <GeometryModel3D.Material>
+                                        <DiffuseMaterial Brush="SteelBlue"/>
+                                    </GeometryModel3D.Material>
+                                </GeometryModel3D>
+
+                                <!-- Ось 2 - Плечо (вращение вокруг Y) -->
+                                <Model3DGroup x:Name="Axis2Group">
+                                    <!-- Соединитель -->
+                                    <GeometryModel3D>
+                                        <GeometryModel3D.Geometry>
+                                            <MeshGeometry3D 
+                                                Positions="-0.15,-0.15,0.2 -0.15,-0.15,0.4 0.15,-0.15,0.4 0.15,-0.15,0.2 -0.15,0.15,0.2 -0.15,0.15,0.4 0.15,0.15,0.4 0.15,0.15,0.2"
+                                                TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                        </GeometryModel3D.Geometry>
+                                        <GeometryModel3D.Material>
+                                            <DiffuseMaterial Brush="DarkBlue"/>
+                                        </GeometryModel3D.Material>
+                                    </GeometryModel3D>
+                                    <!-- Плечо -->
+                                    <GeometryModel3D>
+                                        <GeometryModel3D.Geometry>
+                                            <MeshGeometry3D 
+                                                Positions="-0.2,-0.2,0.4 -0.2,-0.2,1.4 0.2,-0.2,1.4 0.2,-0.2,0.4 -0.2,0.2,0.4 -0.2,0.2,1.4 0.2,0.2,1.4 0.2,0.2,0.4"
+                                                TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                        </GeometryModel3D.Geometry>
+                                        <GeometryModel3D.Material>
+                                            <DiffuseMaterial Brush="DarkBlue"/>
+                                        </GeometryModel3D.Material>
+                                    </GeometryModel3D>
+
+                                    <!-- Ось 3 - Локоть (вращение вокруг Y) -->
+                                    <Model3DGroup x:Name="Axis3Group">
+                                        <!-- Соединитель -->
+                                        <GeometryModel3D>
+                                            <GeometryModel3D.Geometry>
+                                                <MeshGeometry3D 
+                                                    Positions="-0.12,-0.12,1.4 -0.12,-0.12,1.6 0.12,-0.12,1.6 0.12,-0.12,1.4 -0.12,0.12,1.4 -0.12,0.12,1.6 0.12,0.12,1.6 0.12,0.12,1.4"
+                                                    TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                            </GeometryModel3D.Geometry>
+                                            <GeometryModel3D.Material>
+                                                <DiffuseMaterial Brush="Navy"/>
+                                            </GeometryModel3D.Material>
+                                        </GeometryModel3D>
+                                        <!-- Локоть -->
+                                        <GeometryModel3D>
+                                            <GeometryModel3D.Geometry>
+                                                <MeshGeometry3D 
+                                                    Positions="-0.15,-0.15,1.6 -0.15,-0.15,2.6 0.15,-0.15,2.6 0.15,-0.15,1.6 -0.15,0.15,1.6 -0.15,0.15,2.6 0.15,0.15,2.6 0.15,0.15,1.6"
+                                                    TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                            </GeometryModel3D.Geometry>
+                                            <GeometryModel3D.Material>
+                                                <DiffuseMaterial Brush="Navy"/>
+                                            </GeometryModel3D.Material>
+                                        </GeometryModel3D>
+
+                                        <!-- Ось 4 - Запястье 1 (вращение вокруг Z) -->
+                                        <Model3DGroup x:Name="Axis4Group">
+                                            <!-- Соединитель -->
+                                            <GeometryModel3D>
+                                                <GeometryModel3D.Geometry>
+                                                    <MeshGeometry3D 
+                                                        Positions="-0.1,-0.1,2.6 -0.1,-0.1,2.8 0.1,-0.1,2.8 0.1,-0.1,2.6 -0.1,0.1,2.6 -0.1,0.1,2.8 0.1,0.1,2.8 0.1,0.1,2.6"
+                                                        TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                                </GeometryModel3D.Geometry>
+                                                <GeometryModel3D.Material>
+                                                    <DiffuseMaterial Brush="RoyalBlue"/>
+                                                </GeometryModel3D.Material>
+                                            </GeometryModel3D>
+                                            <!-- Запястье 1 -->
+                                            <GeometryModel3D>
+                                                <GeometryModel3D.Geometry>
+                                                    <MeshGeometry3D 
+                                                        Positions="-0.1,-0.1,2.8 -0.1,-0.1,3.0 0.1,-0.1,3.0 0.1,-0.1,2.8 -0.1,0.1,2.8 -0.1,0.1,3.0 0.1,0.1,3.0 0.1,0.1,2.8"
+                                                        TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                                </GeometryModel3D.Geometry>
+                                                <GeometryModel3D.Material>
+                                                    <DiffuseMaterial Brush="RoyalBlue"/>
+                                                </GeometryModel3D.Material>
+                                            </GeometryModel3D>
+
+                                            <!-- Ось 5 - Запястье 2 (вращение вокруг Y) -->
+                                            <Model3DGroup x:Name="Axis5Group">
+                                                <!-- Соединитель -->
+                                                <GeometryModel3D>
+                                                    <GeometryModel3D.Geometry>
+                                                        <MeshGeometry3D 
+                                                            Positions="-0.08,-0.08,3.0 -0.08,-0.08,3.15 0.08,-0.08,3.15 0.08,-0.08,3.0 -0.08,0.08,3.0 -0.08,0.08,3.15 0.08,0.08,3.15 0.08,0.08,3.0"
+                                                            TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                                    </GeometryModel3D.Geometry>
+                                                    <GeometryModel3D.Material>
+                                                        <DiffuseMaterial Brush="Blue"/>
+                                                    </GeometryModel3D.Material>
+                                                </GeometryModel3D>
+                                                <!-- Запястье 2 -->
+                                                <GeometryModel3D>
+                                                    <GeometryModel3D.Geometry>
+                                                        <MeshGeometry3D 
+                                                            Positions="-0.08,-0.08,3.15 -0.08,-0.08,3.3 0.08,-0.08,3.3 0.08,-0.08,3.15 -0.08,0.08,3.15 -0.08,0.08,3.3 0.08,0.08,3.3 0.08,0.08,3.15"
+                                                            TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                                    </GeometryModel3D.Geometry>
+                                                    <GeometryModel3D.Material>
+                                                        <DiffuseMaterial Brush="Blue"/>
+                                                    </GeometryModel3D.Material>
+                                                </GeometryModel3D>
+
+                                                <!-- Ось 6 - Захват (вращение вокруг Z) -->
+                                                <Model3DGroup x:Name="Axis6Group">
+                                                    <!-- Соединитель -->
+                                                    <GeometryModel3D>
+                                                        <GeometryModel3D.Geometry>
+                                                            <MeshGeometry3D 
+                                                                Positions="-0.06,-0.06,3.3 -0.06,-0.06,3.45 0.06,-0.06,3.45 0.06,-0.06,3.3 -0.06,0.06,3.3 -0.06,0.06,3.45 0.06,0.06,3.45 0.06,0.06,3.3"
+                                                                TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                                        </GeometryModel3D.Geometry>
+                                                        <GeometryModel3D.Material>
+                                                            <DiffuseMaterial Brush="LightBlue"/>
+                                                        </GeometryModel3D.Material>
+                                                    </GeometryModel3D>
+                                                    <!-- Захват -->
+                                                    <GeometryModel3D>
+                                                        <GeometryModel3D.Geometry>
+                                                            <MeshGeometry3D 
+                                                                Positions="-0.06,-0.06,3.45 -0.06,-0.06,3.6 0.06,-0.06,3.6 0.06,-0.06,3.45 -0.06,0.06,3.45 -0.06,0.06,3.6 0.06,0.06,3.6 0.06,0.06,3.45"
+                                                                TriangleIndices="0,1,2 0,2,3 4,7,6 4,6,5 0,4,5 0,5,1 1,5,6 1,6,2 2,6,7 2,7,3 3,7,4 3,4,0"/>
+                                                        </GeometryModel3D.Geometry>
+                                                        <GeometryModel3D.Material>
+                                                            <DiffuseMaterial Brush="LightBlue"/>
+                                                        </GeometryModel3D.Material>
+                                                    </GeometryModel3D>
+                                                </Model3DGroup>
+                                            </Model3DGroup>
+                                        </Model3DGroup>
+                                    </Model3DGroup>
+                                </Model3DGroup>
+                            </Model3DGroup>
+                        </Model3DGroup>
+                    </ModelVisual3D.Content>
+                </ModelVisual3D>
+            </Viewport3D>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,41 @@
+#
+# Generated backup file, do not edit.
+#
+# Originally at: C:\Users\Homeworld\Documents\RobotStudio\Projects\EGM_JointControl_RW6.16\Virtual Controllers\TEMP\fb20ff62-5431-4ae1-b8a5-91810d6a7cc0\backup.088621
+# 2025-12-06  23:59:46
+#
+>>SYSTEM_ID:
+VIRTUAL_USE
+
+>>PRODUCTS_ID:
+RobotWare Version: 6.16.02.00
+
+  RobotWare Base
+  English
+  689-1 Externally Guided Motion (EGM)
+  UDPUC Driver
+  Drive System IRB 120/140/260/360/910SC/1200/1400/1520/1600/1660ID
+  ADU-790A in position X3
+  ADU-790A in position Y3
+  ADU-790A in position Z3
+  Axis Calibration
+  IRB 1660ID-4/1.55
+
+>>HOME:
+All public files and directories
+
+>>SYSPAR:
+SYS.cfg
+PROC.cfg
+MMC.cfg
+EIO.cfg
+SIO.cfg
+MOC.cfg
+
+
+>>TASK1: (T_ROB1,,)
+SYSMOD\user.sys @ 
+PROGMOD\Module1.mod @ 
+
+
+>>EOF:
