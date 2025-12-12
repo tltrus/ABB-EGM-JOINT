@@ -1,7 +1,4 @@
 # ABB-EGM-JOINT
-Joint control
-
-## ABB-EGM-JOINT
 
 Robot's joints control by C# app and ABB EGM option.
 
